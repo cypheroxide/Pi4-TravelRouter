@@ -44,3 +44,7 @@ Desktop.ini
 .fuse_hidden*
 .directory
 .Trash-*
+
+# Sensitive/Private documentation files
+src/hope_integrated_nda.md
+src/nvec-security-plan.md
