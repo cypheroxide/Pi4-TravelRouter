@@ -1,0 +1,46 @@
+# System and temporary files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker volumes and logs
+docker-compose.override.yml
+*.log
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# SSH keys and certificates
+*.key
+*.pem
+*.crt
+*.p12
+
+# Environment files with secrets
+.env
+.env.local
+.env.production
+
+# Generated files
+*.pid
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
