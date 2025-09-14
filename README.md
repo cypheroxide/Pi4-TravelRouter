@@ -3,7 +3,7 @@
 > 🚀 **Portable Raspberry Pi 4 Travel Router** - A secure, dockerized travel router with built-in ad-blocking, VPN, and wireless AP capabilities
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/cypheroxide/Pi4-TravelRouter?style=flat-square)
-![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)
+![License: GPL-3.0](https://img.shields.io/badge/license-GPLv3-blue)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat-square&logo=docker&logoColor=white)
 ![Raspberry Pi](https://img.shields.io/badge/-Raspberry_Pi-C51A4A?style=flat-square&logo=Raspberry-Pi)
 ![WireGuard](https://img.shields.io/badge/wireguard-%2388171A.svg?style=flat-square&logo=wireguard&logoColor=white)
