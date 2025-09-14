@@ -182,9 +182,6 @@ Pi4-TravelRouter/
 │   │   └── pi-router-SE-US-1.conf      # ProtonVPN WireGuard config (Swedish)
 │   │
 │   ├── docker-compose-pihole.yml      # Pi-hole container configuration
-│   ├── rpi4-travel-router-plan.md     # Complete setup instructions
-│   ├── Plan_Stages.md                 # Project planning notes
-│   ├── OPTIMIZATION_COMPLETE.md       # System optimization log
 │   └── [additional configs]           # Various configuration files
 └── [git files]                        # .gitignore, etc.
 ```
@@ -199,108 +196,112 @@ Pi4-TravelRouter/
 | **`src/vpn_config/`** | VPN configuration files | ProtonVPN configs for WireGuard/OpenVPN |
 | **Root** | Documentation and compose files | `README.md`, main docker-compose files |
 
-## Installation Guide
+## Getting Started
 
-### Quick Start
+### 📋 Prerequisites
 
-For users who want to get started immediately with default settings:
+Before you begin, review the hardware requirements and ensure you have all necessary components:
 
-```bash
-# Clone the repository
-git clone https://github.com/cypheroxide/Pi4-TravelRouter.git
-cd Pi4-TravelRouter
+📖 **[Hardware Requirements Guide](docs/hardware/requirements.md)** - Complete hardware compatibility and purchasing guide
 
-# Make setup script executable (when available)
-sudo chmod +x src/scripts/setup.sh
+**Quick Checklist:**
+- [ ] Raspberry Pi 4 (4GB+ RAM recommended) 
+- [ ] Compatible USB Wi-Fi adapter (Panda PAU09 recommended)
+- [ ] USB 3.0 storage drive (64GB+ recommended)
+- [ ] MicroSD card (32GB+ Class 10)
+- [ ] Stable power supply (Official Pi 4 adapter)
 
-# Run automated setup (future enhancement)
-# sudo ./src/scripts/setup.sh
+### 🚀 Installation Guide
+
+**Choose your installation path:**
+
+#### Option 1: Step-by-Step Guided Setup (Recommended)
+
+Follow our comprehensive phase-based guides:
+
+1. **[Phase 1: System Preparation](docs/setup/01-system-preparation.md)** (30-45 min)
+   - Raspberry Pi OS installation and basic configuration
+   - USB storage setup and system optimization
+
+2. **[Phase 2: Docker Installation](docs/setup/02-docker-setup.md)** (20-30 min)
+   - Docker and Portainer container management setup
+   - Storage configuration and health monitoring
+
+3. **[Phase 3: Network Configuration](docs/setup/03-network-configuration.md)** (45-60 min)
+   - Access point setup and NAT routing configuration
+   - Wi-Fi management and connectivity scripts
+
+4. **[Phase 4: Service Installation](docs/setup/04-service-installation.md)** (Coming Soon)
+   - Pi-hole, VPN, and additional services
+
+#### Option 2: Quick Reference
+
+For experienced users who prefer concise instructions:
+
+📖 **[Configuration Quick Reference](docs/configuration/)** - All config files and settings in one place
+
+### ⏱️ Estimated Time Requirements
+
+| Experience Level | Setup Time | Notes |
+|------------------|------------|---------|
+| **Beginner** | 4-6 hours | Follow step-by-step guides carefully |
+| **Intermediate** | 2-4 hours | Can skip some explanatory sections |
+| **Advanced** | 1-2 hours | Use quick reference + validation scripts |
+
+### 🔧 What You'll Build
+
+By the end of the installation:
+- **Secure Wi-Fi Access Point** providing internet to your devices
+- **Docker Environment** with Portainer web management 
+- **Network-Level Ad Blocking** with Pi-hole and custom blocklists
+- **VPN Integration** supporting both Tailscale and ProtonVPN
+- **Automated Management** with health monitoring and backups
+- **Web Interfaces** for easy administration
+
+## Documentation
+
+### 📚 Main Guides
+
+The Pi4-TravelRouter documentation is organized into focused, modular guides:
+
+- **[Hardware Guide](docs/hardware/requirements.md)** - Complete hardware requirements and compatibility
+- **[Setup Guides](docs/setup/)** - Phase-based setup instructions
+- **[Configuration Reference](docs/configuration/)** - Templates and settings
+- **[Troubleshooting](docs/troubleshooting/)** - Solutions for common issues
+- **[Security Guide](docs/security/)** - Best practices and hardening
+- **[Maintenance](docs/maintenance/)** - Backup, updates, and monitoring
+
+### 📓 Feature Documentation
+
+| Feature | Documentation | Status |
+|---------|---------------|--------|
+| **Pi-hole Ad Blocking** | [Pi-hole Guide](docs/configuration/pihole.md) | Ready |
+| **Tailscale VPN** | [Tailscale Guide](docs/configuration/tailscale.md) | Coming Soon |
+| **ProtonVPN Integration** | [ProtonVPN Guide](docs/configuration/protonvpn.md) | Coming Soon |
+| **WireGuard Management** | [WG-Easy Guide](docs/configuration/wg-easy.md) | Coming Soon |
+| **Monitoring & Stats** | [Monitoring Guide](docs/maintenance/monitoring.md) | Coming Soon |
+
+### 📁 Directory Structure
+
+The repository is organized as follows:
+
 ```
-
-### Detailed Installation
-
-For complete setup instructions with customization options:
-
-**📖 Follow the comprehensive guide:** [`src/rpi4-travel-router-plan.md`](src/rpi4-travel-router-plan.md)
-
-The detailed installation guide covers:
-- **Phase 1**: Base Raspberry Pi OS setup and system configuration
-- **Phase 2**: Docker installation and USB storage configuration
-- **Phase 3**: Wi-Fi AP setup with hostapd/dnsmasq
-- **Phase 4**: Pi-hole installation and DNS configuration
-- **Phase 5**: Tailscale and WireGuard VPN setup
-- **Phase 6**: Service management and automated startup
-
-### Prerequisites
-
-✅ **Before You Begin:**
-
-1. **Raspberry Pi 4** with fresh Raspberry Pi OS Lite installation
-2. **SSH Access** enabled and working
-3. **Internet Connection** via Ethernet (for initial setup)
-4. **USB Wi-Fi Adapter** (Panda PAU09 or compatible) connected
-5. **USB Storage Drive** (64GB+ recommended) connected
-6. **ProtonVPN Account** (for WireGuard VPN functionality)
-7. **Tailscale Account** (for personal network access)
-
-### Installation Steps Overview
-
-1. **System Setup**: Install base packages and configure USB storage
-2. **Docker Setup**: Install Docker and Portainer with USB backend
-3. **Network Setup**: Configure dual Wi-Fi interfaces and NAT routing
-4. **Pi-hole Setup**: Deploy Pi-hole container with custom blocklists
-5. **VPN Setup**: Configure Tailscale and ProtonVPN WireGuard
-6. **Service Setup**: Configure systemd services for auto-start
-7. **Optimization**: Apply performance tuning and backup configuration
-
-### Estimated Setup Time
-
-- **Quick Setup** (experienced users): 1-2 hours
-- **Detailed Setup** (following full guide): 3-4 hours
-- **First-time Setup** (new to Pi/Linux): 4-6 hours
-
-> **💡 Tip**: Start with a wired Ethernet connection for initial setup, then configure Wi-Fi functionality once the base system is working.
-
-## Configuration Files
-
-The project includes several pre-configured files for easy deployment:
-
-### Docker Compose Files
-
-**📄 `src/docker-compose-pihole.yml`**
-```yaml
-services:
-  pihole:
-    container_name: pihole
-    image: pihole/pihole:latest
-    restart: unless-stopped
-    ports:
-      - "53:53/tcp"
-      - "53:53/udp" 
-      - "80:80/tcp"
-    environment:
-      TZ: 'America/Chicago'
-      WEBPASSWORD: 'CHANGE_THIS_PASSWORD'
-      FTLCONF_LOCAL_IPV4: '192.168.4.1'
-    volumes:
-      - '/mnt/storage/pihole/etc/:/etc/pihole'
-      - '/mnt/storage/pihole/dnsmasq.d:/etc/dnsmasq.d'
+Pi4-TravelRouter/
+├── docs/                       # Documentation files
+│   ├── hardware/               # Hardware guides and compatibility
+│   ├── setup/                  # Step-by-step setup guides
+│   ├── configuration/          # Config file reference
+│   ├── troubleshooting/        # Issue resolution guides
+│   ├── security/               # Security hardening docs
+│   └── maintenance/            # Maintenance procedures
+├── src/                        # Source files
+│   ├── Lists/                  # DNS blocklists
+│   ├── scripts/                # Utility scripts
+│   ├── vpn_config/             # VPN configuration files
+│   ├── wg-easy/                # WireGuard web UI
+│   └── docker-compose-pihole.yml # Pi-hole configuration
+└── README.md                   # This file
 ```
-
-**📄 `src/wg-easy/docker-compose.yml`**
-```yaml
-services:
-  wg-easy:
-    image: ghcr.io/wg-easy/wg-easy:15
-    container_name: wg-easy
-    networks:
-      wg:
-        ipv4_address: 10.42.42.42
-        ipv6_address: fdcc:ad94:bacf:61a3::2a
-    volumes:
-      - etc_wireguard:/etc/wireguard
-    ports:
-      - "51820:51820/udp"
       - "51821:51821/tcp"
     cap_add:
       - NET_ADMIN

@@ -111,6 +111,7 @@ sudo docker run -d \
 ## Phase 3: Network Configuration & Access Point
 
 ### Step 6: Configure USB Wi-Fi Adapter
+  #### NOTE: Read all of these instructions before implementing. I experienced `dnsmasq` errors and had to change my setup (found in Issue #4)
 ```bash
 # Install hostapd and dnsmasq
 sudo apt install -y hostapd dnsmasq
@@ -141,7 +142,7 @@ wpa_pairwise=TKIP
 rsn_pairwise=CCMP
 EOF
 
-# Configure dnsmasq
+# Configure dnsmasq 
 sudo cp /etc/dnsmasq.conf /etc/dnsmasq.conf.backup
 sudo tee /etc/dnsmasq.conf > /dev/null <<EOF
 interface=wlan1
