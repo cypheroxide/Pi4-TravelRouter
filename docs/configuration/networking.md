@@ -1,0 +1,733 @@
+# Network Configuration Reference
+
+## Overview
+
+This guide covers all network configuration aspects for the Pi4-TravelRouter, including hostapd, interface configuration, routing, firewall rules, and advanced networking features.
+
+## Network Architecture
+
+### Network Topology
+
+```
+Internet ←→ WiFi/Ethernet ←→ Pi4-TravelRouter ←→ Access Point (192.168.4.0/24)
+                                     ↓
+                               WireGuard VPN (10.8.0.0/24)
+                                     ↓
+                               Docker Network (172.20.0.0/16)
+```
+
+### IP Address Allocation
+
+```bash
+# Access Point Network
+192.168.4.1      - Router/Gateway (Pi4)
+192.168.4.1      - Pi-hole DNS
+192.168.4.100-200 - DHCP Range
+192.168.4.10-99   - Static Assignments
+
+# WireGuard VPN
+10.8.0.1         - VPN Gateway
+10.8.0.2-254     - VPN Clients
+
+# Docker Network
+172.20.0.0/16    - Docker Containers
+172.20.0.10      - Pi-hole Container
+172.20.0.20      - WG-Easy Container
+```
+
+## Core Network Configuration
+
+### System Network Interfaces
+
+**File**: `/etc/systemd/network/20-wired.network`
+
+```ini
+[Match]
+Name=eth0
+
+[Network]
+DHCP=yes
+IPForward=yes
+
+[DHCPv4]
+UseDNS=false
+UseNTP=false
+```
+
+**File**: `/etc/systemd/network/25-wireless-station.network`
+
+```ini
+[Match]
+Name=wlan0
+
+[Network]
+DHCP=yes
+IPForward=yes
+
+[DHCPv4]
+UseDNS=false
+UseNTP=false
+```
+
+**File**: `/etc/systemd/network/30-wireless-ap.network`
+
+```ini
+[Match]
+Name=wlan1
+
+[Network]
+Address=192.168.4.1/24
+DHCPServer=no
+IPForward=yes
+DNS=1.1.1.1
+DNS=8.8.8.8
+
+[Address]
+Address=192.168.4.1/24
+Broadcast=192.168.4.255
+```
+
+### Enable systemd-networkd
+
+```bash
+# Disable NetworkManager (if installed)
+sudo systemctl disable NetworkManager
+sudo systemctl stop NetworkManager
+
+# Enable systemd-networkd
+sudo systemctl enable systemd-networkd
+sudo systemctl start systemd-networkd
+
+# Enable systemd-resolved
+sudo systemctl enable systemd-resolved
+sudo systemctl start systemd-resolved
+```
+
+## WiFi Access Point Configuration
+
+### hostapd Configuration
+
+**File**: `/etc/hostapd/hostapd.conf`
+
+```bash
+# Pi4-TravelRouter Access Point Configuration
+
+# Interface and driver
+interface=wlan1
+driver=nl80211
+
+# Network name and mode
+ssid=Pi4-TravelRouter
+hw_mode=g
+channel=6
+ieee80211n=1
+ieee80211ac=1
+require_ht=1
+ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]
+
+# Access control
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+
+# WiFi security
+wpa=2
+wpa_passphrase=CHANGE_THIS_PASSWORD
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP
+
+# Performance optimization
+wmm_enabled=1
+country_code=US
+
+# Logging
+logger_syslog=-1
+logger_syslog_level=2
+logger_stdout=-1
+logger_stdout_level=2
+
+# Client management
+max_num_sta=20
+beacon_int=100
+dtim_period=2
+```
+
+### WiFi Security Variants
+
+#### WPA3 (Modern Security)
+
+```bash
+# WPA3-SAE configuration
+wpa=3
+wpa_key_mgmt=SAE
+sae_password=STRONG_PASSWORD_HERE
+sae_require_mfp=1
+ieee80211w=2
+```
+
+#### Mixed WPA2/WPA3 (Compatibility)
+
+```bash
+# Mixed mode for device compatibility
+wpa=2
+wpa_key_mgmt=WPA-PSK SAE
+wpa_passphrase=STRONG_PASSWORD_HERE
+sae_password=STRONG_PASSWORD_HERE
+ieee80211w=1
+```
+
+#### Open Network (Testing Only)
+
+```bash
+# Open network - INSECURE, for testing only
+# Remove all wpa_* and sae_* lines
+# Add:
+auth_algs=1
+wpa=0
+```
+
+### Channel Selection and Optimization
+
+#### 2.4GHz Channel Configuration
+
+```bash
+# Recommended channels for 2.4GHz (less congested)
+channel=1   # or 6 or 11 for non-overlapping channels
+
+# Channel width
+ht_capab=[HT40+][SHORT-GI-20][SHORT-GI-40]  # 40MHz width
+# or
+ht_capab=[SHORT-GI-20]                       # 20MHz width (more stable)
+```
+
+#### 5GHz Configuration (if supported)
+
+```bash
+# 5GHz configuration
+hw_mode=a
+channel=36  # or 44, 149, 157
+country_code=US
+
+# 802.11ac settings
+ieee80211ac=1
+vht_capab=[VHT160][SHORT-GI-80][SHORT-GI-160]
+vht_oper_chwidth=1
+vht_oper_centr_freq_seg0_idx=42
+```
+
+### hostapd Service Configuration
+
+**File**: `/etc/systemd/system/hostapd.service.d/override.conf`
+
+```ini
+[Unit]
+After=sys-subsystem-net-devices-wlan1.device
+
+[Service]
+ExecStartPre=/bin/sleep 2
+ExecStartPre=/sbin/iw dev wlan1 set power_save off
+```
+
+## Routing and NAT Configuration
+
+### IP Forwarding
+
+**File**: `/etc/sysctl.d/99-router.conf`
+
+```bash
+# Enable IP forwarding
+net.ipv4.ip_forward = 1
+net.ipv6.conf.all.forwarding = 1
+
+# Network performance optimizations
+net.core.rmem_default = 262144
+net.core.rmem_max = 16777216
+net.core.wmem_default = 262144
+net.core.wmem_max = 16777216
+net.ipv4.tcp_rmem = 4096 65536 16777216
+net.ipv4.tcp_wmem = 4096 65536 16777216
+
+# Security settings
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+```
+
+### iptables NAT Rules
+
+**File**: `/etc/iptables/rules.v4`
+
+```bash
+# Generated by iptables-save
+*nat
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+
+# NAT rules for internet sharing
+-A POSTROUTING -o eth0 -j MASQUERADE
+-A POSTROUTING -o wlan0 -j MASQUERADE
+
+# Port forwarding for services (optional)
+-A PREROUTING -i wlan1 -p tcp --dport 80 -j DNAT --to-destination 172.20.0.10:80
+-A PREROUTING -i wlan1 -p udp --dport 53 -j DNAT --to-destination 172.20.0.10:53
+
+COMMIT
+
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Accept loopback traffic
+-A INPUT -i lo -j ACCEPT
+
+# Accept established connections
+-A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
+# Accept local network traffic
+-A INPUT -s 192.168.4.0/24 -j ACCEPT
+-A INPUT -s 172.20.0.0/16 -j ACCEPT
+
+# Allow DHCP
+-A INPUT -p udp --dport 67:68 --sport 67:68 -j ACCEPT
+
+# Allow DNS
+-A INPUT -p tcp --dport 53 -j ACCEPT
+-A INPUT -p udp --dport 53 -j ACCEPT
+
+# Allow HTTP (Pi-hole admin)
+-A INPUT -p tcp --dport 80 -j ACCEPT
+
+# Allow WireGuard
+-A INPUT -p udp --dport 51820 -j ACCEPT
+-A INPUT -p tcp --dport 51821 -j ACCEPT
+
+# Allow SSH (be careful!)
+-A INPUT -p tcp --dport 22 -j ACCEPT
+
+# Forward traffic between interfaces
+-A FORWARD -i wlan1 -o eth0 -j ACCEPT
+-A FORWARD -i wlan1 -o wlan0 -j ACCEPT
+-A FORWARD -i eth0 -o wlan1 -j ACCEPT
+-A FORWARD -i wlan0 -o wlan1 -j ACCEPT
+
+# Drop invalid packets
+-A INPUT -m conntrack --ctstate INVALID -j DROP
+-A FORWARD -m conntrack --ctstate INVALID -j DROP
+
+# Default policies (change to DROP for security)
+-A INPUT -j REJECT --reject-with icmp-port-unreachable
+-A FORWARD -j REJECT --reject-with icmp-port-unreachable
+
+COMMIT
+```
+
+### IPv6 Rules (if needed)
+
+**File**: `/etc/iptables/rules.v6`
+
+```bash
+# Generated by ip6tables-save
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Accept loopback traffic
+-A INPUT -i lo -j ACCEPT
+
+# Accept established connections
+-A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+
+# Allow ICMPv6
+-A INPUT -p ipv6-icmp -j ACCEPT
+-A FORWARD -p ipv6-icmp -j ACCEPT
+
+# Drop everything else
+-A INPUT -j REJECT --reject-with icmp6-port-unreachable
+-A FORWARD -j REJECT --reject-with icmp6-port-unreachable
+
+COMMIT
+```
+
+## Advanced Network Features
+
+### Quality of Service (QoS)
+
+**File**: `/etc/systemd/system/qos.service`
+
+```ini
+[Unit]
+Description=Traffic Control QoS
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/setup-qos.sh
+RemainAfterExit=yes
+ExecStop=/usr/local/bin/cleanup-qos.sh
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**File**: `/usr/local/bin/setup-qos.sh`
+
+```bash
+#!/bin/bash
+
+# Simple QoS setup for Pi4-TravelRouter
+INTERFACE="wlan1"
+RATE="50mbit"
+
+# Create root qdisc
+tc qdisc add dev $INTERFACE root handle 1: htb default 30
+
+# Create main class
+tc class add dev $INTERFACE parent 1: classid 1:1 htb rate $RATE
+
+# High priority (interactive traffic)
+tc class add dev $INTERFACE parent 1:1 classid 1:10 htb rate 20mbit ceil $RATE prio 1
+tc qdisc add dev $INTERFACE parent 1:10 handle 10: sfq perturb 10
+
+# Medium priority (bulk traffic)
+tc class add dev $INTERFACE parent 1:1 classid 1:20 htb rate 20mbit ceil $RATE prio 2
+tc qdisc add dev $INTERFACE parent 1:20 handle 20: sfq perturb 10
+
+# Low priority (background)
+tc class add dev $INTERFACE parent 1:1 classid 1:30 htb rate 10mbit ceil $RATE prio 3
+tc qdisc add dev $INTERFACE parent 1:30 handle 30: sfq perturb 10
+
+# Filters
+# SSH, DNS, HTTP - high priority
+tc filter add dev $INTERFACE protocol ip parent 1:0 prio 1 u32 match ip dport 22 0xffff flowid 1:10
+tc filter add dev $INTERFACE protocol ip parent 1:0 prio 1 u32 match ip dport 53 0xffff flowid 1:10
+tc filter add dev $INTERFACE protocol ip parent 1:0 prio 1 u32 match ip dport 80 0xffff flowid 1:10
+
+# Everything else - medium priority (default)
+```
+
+### Network Monitoring
+
+**File**: `/usr/local/bin/network-monitor.sh`
+
+```bash
+#!/bin/bash
+
+# Network monitoring script for Pi4-TravelRouter
+
+LOG_FILE="/var/log/network-monitor.log"
+INTERFACES=("eth0" "wlan0" "wlan1")
+
+log_message() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
+}
+
+check_interface() {
+    local interface=$1
+    if ip link show "$interface" | grep -q "state UP"; then
+        log_message "Interface $interface is UP"
+        return 0
+    else
+        log_message "Interface $interface is DOWN"
+        return 1
+    fi
+}
+
+check_connectivity() {
+    local host=$1
+    if ping -c 1 -W 5 "$host" > /dev/null 2>&1; then
+        log_message "Connectivity to $host successful"
+        return 0
+    else
+        log_message "Connectivity to $host failed"
+        return 1
+    fi
+}
+
+main() {
+    log_message "Network monitoring check started"
+    
+    # Check all interfaces
+    for interface in "${INTERFACES[@]}"; do
+        check_interface "$interface"
+    done
+    
+    # Check internet connectivity
+    check_connectivity "8.8.8.8"
+    check_connectivity "1.1.1.1"
+    
+    # Check local services
+    if command -v docker &> /dev/null; then
+        if docker ps | grep -q pihole; then
+            log_message "Pi-hole container is running"
+        else
+            log_message "Pi-hole container is not running"
+        fi
+    fi
+    
+    log_message "Network monitoring check completed"
+}
+
+# Run monitoring
+main
+```
+
+### Bandwidth Monitoring
+
+**File**: `/usr/local/bin/bandwidth-monitor.sh`
+
+```bash
+#!/bin/bash
+
+# Bandwidth monitoring for Pi4-TravelRouter
+
+INTERFACE="wlan1"
+LOG_FILE="/var/log/bandwidth.log"
+INTERVAL=60  # seconds
+
+get_bytes() {
+    local interface=$1
+    local direction=$2  # rx or tx
+    cat "/sys/class/net/$interface/statistics/${direction}_bytes"
+}
+
+monitor_bandwidth() {
+    local interface=$1
+    
+    while true; do
+        rx_bytes_start=$(get_bytes "$interface" "rx")
+        tx_bytes_start=$(get_bytes "$interface" "tx")
+        
+        sleep $INTERVAL
+        
+        rx_bytes_end=$(get_bytes "$interface" "rx")
+        tx_bytes_end=$(get_bytes "$interface" "tx")
+        
+        rx_rate=$(( (rx_bytes_end - rx_bytes_start) / INTERVAL ))
+        tx_rate=$(( (tx_bytes_end - tx_bytes_start) / INTERVAL ))
+        
+        rx_mbps=$(echo "scale=2; $rx_rate * 8 / 1000000" | bc)
+        tx_mbps=$(echo "scale=2; $tx_rate * 8 / 1000000" | bc)
+        
+        timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+        echo "$timestamp,$interface,$rx_mbps,$tx_mbps" >> "$LOG_FILE"
+        
+        echo "[$timestamp] $interface: RX: ${rx_mbps} Mbps, TX: ${tx_mbps} Mbps"
+    done
+}
+
+# Start monitoring
+monitor_bandwidth "$INTERFACE"
+```
+
+## Network Troubleshooting
+
+### Diagnostic Commands
+
+```bash
+# Check interface status
+ip addr show
+ip link show
+
+# Check routing table
+ip route show
+route -n
+
+# Check wireless status
+iw dev wlan1 info
+iwconfig wlan1
+
+# Check hostapd status
+sudo systemctl status hostapd
+sudo journalctl -u hostapd -f
+
+# Check connected clients
+iw dev wlan1 station dump
+
+# Test DNS resolution
+dig @192.168.4.1 google.com
+nslookup google.com 192.168.4.1
+
+# Check NAT/iptables
+sudo iptables -L -n -v
+sudo iptables -t nat -L -n -v
+
+# Monitor network traffic
+sudo tcpdump -i wlan1 -n
+iftop -i wlan1
+```
+
+### Common Issues and Solutions
+
+#### 1. WiFi Access Point Not Starting
+
+```bash
+# Check if interface is blocked
+sudo rfkill list all
+sudo rfkill unblock wifi
+
+# Check if interface is up
+sudo ip link set wlan1 up
+
+# Restart hostapd
+sudo systemctl restart hostapd
+sudo journalctl -u hostapd --no-pager
+```
+
+#### 2. No Internet Access for Clients
+
+```bash
+# Check IP forwarding
+cat /proc/sys/net/ipv4/ip_forward  # Should be 1
+
+# Check NAT rules
+sudo iptables -t nat -L POSTROUTING -n -v
+
+# Test upstream connectivity
+ping -I eth0 8.8.8.8
+ping -I wlan0 8.8.8.8
+
+# Check default route
+ip route show default
+```
+
+#### 3. DNS Resolution Issues
+
+```bash
+# Check if Pi-hole is running
+docker ps | grep pihole
+
+# Test DNS directly
+dig @127.0.0.1 google.com
+dig @1.1.1.1 google.com
+
+# Check DNS forwarding
+sudo iptables -t nat -L PREROUTING -n -v | grep :53
+```
+
+#### 4. Performance Issues
+
+```bash
+# Check CPU usage
+htop
+iostat -x 1
+
+# Check memory usage
+free -h
+docker stats
+
+# Check network interface errors
+ip -s link show wlan1
+cat /proc/net/dev
+
+# Monitor traffic
+iftop -i wlan1
+nethogs
+```
+
+### Performance Optimization
+
+#### WiFi Performance
+
+```bash
+# Set WiFi power management off
+sudo iw dev wlan1 set power_save off
+
+# Optimize hostapd buffer sizes
+# Add to /etc/hostapd/hostapd.conf:
+tx_queue_data2_aifs=1
+tx_queue_data2_cwmin=7
+tx_queue_data2_cwmax=15
+tx_queue_data2_burst=3.0
+```
+
+#### Network Buffer Tuning
+
+**File**: `/etc/sysctl.d/network-performance.conf`
+
+```bash
+# Network buffer optimizations
+net.core.rmem_default = 262144
+net.core.rmem_max = 16777216
+net.core.wmem_default = 262144
+net.core.wmem_max = 16777216
+net.core.netdev_max_backlog = 5000
+
+# TCP optimization
+net.ipv4.tcp_congestion_control = bbr
+net.ipv4.tcp_rmem = 4096 65536 16777216
+net.ipv4.tcp_wmem = 4096 65536 16777216
+net.ipv4.tcp_mtu_probing = 1
+```
+
+## Security Considerations
+
+### Network Security Best Practices
+
+1. **Change Default Passwords**: Always change default WiFi and admin passwords
+2. **Use WPA3**: Enable WPA3 when supported by all devices
+3. **MAC Address Filtering**: Consider enabling for high-security environments
+4. **Guest Network**: Implement separate guest network if needed
+5. **Firewall Rules**: Regularly review and update iptables rules
+6. **Monitor Access**: Keep logs of connected devices and unusual activity
+
+### Advanced Security Features
+
+#### MAC Address Filtering
+
+```bash
+# Add to /etc/hostapd/hostapd.conf
+macaddr_acl=1
+accept_mac_file=/etc/hostapd/hostapd.accept
+
+# Create allow list
+echo "aa:bb:cc:dd:ee:01" > /etc/hostapd/hostapd.accept
+echo "aa:bb:cc:dd:ee:02" >> /etc/hostapd/hostapd.accept
+```
+
+#### Client Isolation
+
+```bash
+# Add to /etc/hostapd/hostapd.conf
+ap_isolate=1  # Prevents clients from communicating with each other
+```
+
+#### Rate Limiting
+
+```bash
+# Add iptables rules for rate limiting
+iptables -A INPUT -p icmp -m limit --limit 1/s --limit-burst 1 -j ACCEPT
+iptables -A INPUT -p tcp --dport 22 -m limit --limit 4/min --limit-burst 3 -j ACCEPT
+```
+
+## Integration Points
+
+### Docker Network Integration
+
+The Pi4-TravelRouter network integrates with Docker through:
+
+- **Bridge Network**: Docker containers use 172.20.0.0/16 subnet
+- **Port Forwarding**: Services exposed via iptables NAT rules
+- **DNS Resolution**: Pi-hole container provides DNS for both local and container networks
+
+### VPN Integration
+
+- **WireGuard**: Routes VPN traffic through the router
+- **Tailscale**: Can provide additional secure access
+- **ProtonVPN**: Can route all traffic through VPN for privacy
+
+## Next Steps
+
+- **Pi-hole Configuration**: See [pihole.md](pihole.md) for DNS setup
+- **Docker Services**: See [docker-compose.md](docker-compose.md) for container configuration
+- **Security Hardening**: See [Security Guide](../security/) for additional protection
+- **ProtonVPN Setup**: See [protonvpn.md](protonvpn.md) for VPN client configuration

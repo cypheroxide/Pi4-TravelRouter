@@ -8,71 +8,27 @@
 ![Raspberry Pi](https://img.shields.io/badge/-Raspberry_Pi-C51A4A?style=flat-square&logo=Raspberry-Pi)
 ![WireGuard](https://img.shields.io/badge/wireguard-%2388171A.svg?style=flat-square&logo=wireguard&logoColor=white)
 
-## Project Overview
+## Overview
 
-Pi4-TravelRouter transforms a Raspberry Pi 4 into a feature-rich travel router that provides secure internet access when traveling. Instead of connecting your devices directly to untrusted public Wi-Fi networks, this solution creates your own private wireless access point while routing traffic through the public network via a secure, managed connection.
+Transform a Raspberry Pi 4 into a secure travel router that creates your own private wireless network, protecting your devices from untrusted public Wi-Fi. Features include network-level ad-blocking, VPN integration, and web-based management interfaces.
 
 **Key Benefits:**
-- 🔒 **Security**: Your devices never connect directly to public Wi-Fi
-- 🛡️ **Privacy**: Built-in Pi-hole blocks ads and trackers at the network level
-- 🌐 **VPN Integration**: Seamless Tailscale and ProtonVPN WireGuard support
-- 📱 **Easy Management**: Web-based interfaces for all components
-- 💾 **Persistent Storage**: All data and containers stored on USB drive
-- ⚡ **Optimized Performance**: 8GB SSD swap and automated backups
-
-This project was developed as a reliable alternative to solutions like FreedomBox and RaspAP, using standard Raspberry Pi OS and well-tested components for maximum stability.
+- 🔒 **Security**: Private wireless AP instead of direct public Wi-Fi connection
+- 🛡️ **Privacy**: Pi-hole blocks ads and trackers for all connected devices
+- 🌐 **VPN Integration**: Support for Tailscale, ProtonVPN, and WireGuard
+- 📱 **Easy Management**: Web interfaces for all services
+- 💾 **Portable**: All data stored on USB drive for complete portability
 
 ## Key Features
 
-### 📡 **Wireless Router/Access Point**
-- **Panda PAU09 N600 USB Wi-Fi Adapter**: Creates a secure wireless AP for your devices
-- **Dual Wi-Fi Setup**: Built-in Wi-Fi connects to public networks, USB adapter broadcasts your private network
-- **WPA2 Security**: Protected access point with customizable SSID and password
-- **DHCP Server**: Automatic IP assignment for connected devices (192.168.4.0/24 subnet)
+- **📡 Wireless Access Point**: Dual Wi-Fi setup with secure WPA2 AP for your devices
+- **🛡️ Network-Level Ad Blocking**: Pi-hole DNS filtering with comprehensive blocklists
+- **🔐 VPN Integration**: Support for Tailscale, ProtonVPN, and custom WireGuard
+- **🐳 Container Management**: Docker services with Portainer web interface
+- **💾 Portable Storage**: All data stored on USB drive for complete portability
+- **🔧 Automated Management**: Health monitoring, backups, and web interfaces
 
-### 🐳 **Docker + Portainer Container Management**
-- **Portainer Web UI**: Easy container management via web interface
-- **Persistent Storage**: All containers and data stored on USB drive for portability
-- **Docker Compose**: Orchestrated multi-container deployments
-- **Log Management**: Automated log rotation to prevent disk space issues
-
-### 🛡️ **Pi-hole Network-Level Ad Blocking**
-- **DNS Filtering**: Blocks ads, trackers, and malicious domains at the network level
-- **Custom Blocklists**: Pre-configured with BlockListProject comprehensive lists
-- **Web Dashboard**: Monitor blocked queries and manage whitelist/blacklist
-- **Network-Wide Protection**: All connected devices benefit from ad blocking
-
-### 🔐 **Tailscale VPN Integration**
-- **Personal Network Access**: Secure connection to your home/office network
-- **Route Advertisement**: Share the travel router subnet with your Tailscale network
-- **Zero-Config**: Simple setup with automatic mesh networking
-- **Cross-Platform**: Access from any device with Tailscale installed
-
-### 🌐 **WireGuard with ProtonVPN**
-- **Toggle VPN Support**: Easy switching between direct connection and ProtonVPN
-- **Multiple Endpoints**: Pre-configured Swiss (CH) and Swedish (SE) servers
-- **Kill Switch**: Automatic failsafe to prevent traffic leaks
-- **NetShield Integration**: ProtonVPN's ad-blocking and malware protection
-
-### 📊 **Advanced DNS Blocklists**
-- **BlockListProject Integration**: Comprehensive blocklists for various categories
-- **Categorized Blocking**: Ads, malware, phishing, tracking, social media, and more
-- **Regular Updates**: Automated blocklist updates for current threat protection
-- **Customizable**: Easy addition/removal of specific blocklist categories
-
-### 💾 **Optimized Storage & Performance**
-- **USB Drive Storage**: All persistent data stored on external USB drive
-- **8GB SSD Swap**: High-performance swap file on SSD for heavy workloads
-- **Memory Optimization**: Tuned kernel parameters for better RAM utilization
-- **Automated Backups**: Daily system backups with 7-day retention
-
-### 🔧 **System Management & Monitoring**
-- **Automated Setup Scripts**: One-command deployment and configuration
-- **Service Management**: Systemd integration for reliable startup/shutdown
-- **Health Monitoring**: Built-in status checks and logging
-- **Recovery Tools**: Backup and restore capabilities for disaster recovery
-
-## Architecture Overview
+## How It Works
 
 The Pi4-TravelRouter uses a dual Wi-Fi interface design to provide secure internet access:
 
@@ -97,890 +53,165 @@ The Pi4-TravelRouter uses a dual Wi-Fi interface design to provide secure intern
                    (Docker Container)      (Optional)
 ```
 
-### Network Flow
-1. **wlan0** (Built-in Wi-Fi): Connects to public Wi-Fi networks as a client
-2. **wlan1** (USB Adapter): Creates a secure access point for your devices
-3. **NAT Routing**: Traffic from wlan1 → wlan0 with iptables rules
-4. **DNS Filtering**: All DNS queries filtered through Pi-hole
-5. **VPN Routing**: Optional routing through Tailscale or ProtonVPN WireGuard
-
-### Interface Configuration
-- **wlan0**: DHCP client (receives IP from public network)
-- **wlan1**: Static IP `192.168.4.1/24` (serves as gateway)
-- **Access Point**: SSID: `RaspberryPi-Travel`, WPA2-PSK security
-- **DHCP Range**: `192.168.4.2` - `192.168.4.20`
+**Network Flow:**
+1. **wlan0** (Built-in): Connects to public Wi-Fi as client
+2. **wlan1** (USB Adapter): Creates secure access point for your devices
+3. **Pi-hole**: Filters all DNS requests to block ads and malware
+4. **VPN** (Optional): Routes traffic through Tailscale or ProtonVPN
 
 ## Hardware Requirements
 
-### Required Components
+**Essential Components:**
+- Raspberry Pi 4 (4GB+ RAM)
+- Compatible USB Wi-Fi adapter (Panda PAU09 recommended)
+- USB 3.0 storage drive (64GB+)
+- MicroSD card (32GB+ Class 10)
+- Official Pi 4 power supply
 
-| Component | Specification | Purpose |
-|-----------|--------------|----------|
-| **Raspberry Pi 4** | 4GB RAM minimum, 8GB recommended | Main processing unit |
-| **MicroSD Card** | 32GB+ Class 10 or better | Boot drive and OS |
-| **USB Wi-Fi Adapter** | Panda PAU09 N600 or compatible | Creates access point (wlan1) |
-| **USB Storage Drive** | 64GB+ USB 3.0 recommended | Docker containers and data |
-| **Power Supply** | Official Pi 4 power adapter (5V/3A) | Reliable power for Pi + USB devices |
+📊 **[Complete Hardware Guide](docs/hardware/requirements.md)** - Detailed requirements, compatibility lists, and purchasing recommendations
 
-### Recommended Components
-
-| Component | Specification | Benefit |
-|-----------|--------------|----------|
-| **External SSD** | 64GB+ USB 3.0 SSD | Faster swap and better performance |
-| **USB 3.0 Hub** | Powered hub with 4+ ports | More USB ports for storage + adapters |
-| **Case with Cooling** | Pi 4 case with fan/heatsinks | Better thermal management |
-| **Ethernet Cable** | Cat5e/6 cable | Initial setup and troubleshooting |
-
-### Tested Wi-Fi Adapters
-
-✅ **Confirmed Compatible:**
-- Panda PAU09 N600 (Recommended)
-- TP-Link AC600T2U Plus
-- Alfa AWUS036ACS
-
-⚠️ **Requirements for USB Wi-Fi Adapter:**
-- **AP Mode Support**: Must support `hostapd` access point mode
-- **Driver Support**: Should work with standard Linux kernels (no proprietary drivers)
-- **Sufficient Power**: USB 2.0 devices recommended (lower power consumption)
-- **Dual-Band**: 2.4GHz minimum, 5GHz support beneficial
-
-### Power Considerations
-- **Total Power Draw**: ~15W (Pi 4 + USB adapter + storage)
-- **Power Bank**: 20,000mAh+ for 8-12 hours portable operation
-- **USB-C PD**: Supports USB-C Power Delivery for newer power banks
-
-## Directory Structure
-
-```
-Pi4-TravelRouter/
-├── README.md                           # This documentation
-├── src/                               # Source files and configurations
-│   ├── Lists/                         # DNS Blocklists from BlockListProject
-│   │   ├── README.md                  # BlockListProject documentation
-│   │   ├── ads.txt                    # Ad-blocking domains
-│   │   ├── malware.txt                # Malware/phishing domains
-│   │   ├── tracking.txt               # Tracking domains
-│   │   ├── everything.txt             # Combined blocklist
-│   │   ├── facebook.txt               # Facebook/Meta domains
-│   │   ├── tiktok.txt                 # TikTok domains
-│   │   ├── gambling.txt               # Gambling sites
-│   │   ├── piracy.txt                 # Piracy/torrent sites
-│   │   └── [additional blocklists]    # Various category-specific lists
-│   │
-│   ├── scripts/                       # Setup and management scripts
-│   │   ├── docker.sh                  # Docker installation script
-│   │   └── dockermanager.deb          # Docker management package
-│   │
-│   ├── wg-easy/                       # WireGuard Easy management interface
-│   │   ├── docker-compose.yml         # WG-Easy container configuration
-│   │   ├── README.md                  # WG-Easy documentation
-│   │   └── [wg-easy files]            # WireGuard web UI components
-│   │
-│   ├── vpn_config/                    # VPN configuration files
-│   │   ├── ch-us-03.protonvpn.udp.ovpn # ProtonVPN OpenVPN config (Swiss)
-│   │   ├── pi-router-swiss-CH-US-3.conf # ProtonVPN WireGuard config (Swiss)
-│   │   └── pi-router-SE-US-1.conf      # ProtonVPN WireGuard config (Swedish)
-│   │
-│   ├── docker-compose-pihole.yml      # Pi-hole container configuration
-│   └── [additional configs]           # Various configuration files
-└── [git files]                        # .gitignore, etc.
-```
-
-### Directory Purposes
-
-| Directory | Purpose | Key Files |
-|-----------|---------|----------|
-| **`src/Lists/`** | DNS blocklists for Pi-hole | `ads.txt`, `malware.txt`, `everything.txt` |
-| **`src/scripts/`** | Setup and automation scripts | `docker.sh` (Docker installer) |
-| **`src/wg-easy/`** | WireGuard web management UI | `docker-compose.yml`, web interface |
-| **`src/vpn_config/`** | VPN configuration files | ProtonVPN configs for WireGuard/OpenVPN |
-| **Root** | Documentation and compose files | `README.md`, main docker-compose files |
 
 ## Getting Started
 
 ### 📋 Prerequisites
 
-Before you begin, review the hardware requirements and ensure you have all necessary components:
-
-📖 **[Hardware Requirements Guide](docs/hardware/requirements.md)** - Complete hardware compatibility and purchasing guide
-
 **Quick Checklist:**
-- [ ] Raspberry Pi 4 (4GB+ RAM recommended) 
-- [ ] Compatible USB Wi-Fi adapter (Panda PAU09 recommended)
-- [ ] USB 3.0 storage drive (64GB+ recommended)
+- [ ] Raspberry Pi 4 (4GB+ RAM)
+- [ ] Compatible USB Wi-Fi adapter
+- [ ] USB 3.0 storage drive (64GB+)
 - [ ] MicroSD card (32GB+ Class 10)
-- [ ] Stable power supply (Official Pi 4 adapter)
+- [ ] Official Pi 4 power supply
 
-### 🚀 Installation Guide
+📊 **[Complete Hardware Guide](docs/hardware/requirements.md)**
 
-**Choose your installation path:**
+### 🚀 Installation Options
 
-#### Option 1: Step-by-Step Guided Setup (Recommended)
+#### Guided Setup (Recommended for Beginners)
+Follow our step-by-step phase-based installation guides:
 
-Follow our comprehensive phase-based guides:
+1. **[System Preparation](docs/setup/01-system-preparation.md)** - Pi OS setup and storage
+2. **[Docker Setup](docs/setup/02-docker-setup.md)** - Container management
+3. **[Network Configuration](docs/setup/03-network-configuration.md)** - Access point and routing
+4. **[Service Installation](docs/setup/04-service-installation.md)** - Pi-hole and VPN setup
 
-1. **[Phase 1: System Preparation](docs/setup/01-system-preparation.md)** (30-45 min)
-   - Raspberry Pi OS installation and basic configuration
-   - USB storage setup and system optimization
+#### Quick Reference (For Experienced Users)
+**[Configuration Reference](docs/configuration/)** - All config files and templates
 
-2. **[Phase 2: Docker Installation](docs/setup/02-docker-setup.md)** (20-30 min)
-   - Docker and Portainer container management setup
-   - Storage configuration and health monitoring
-
-3. **[Phase 3: Network Configuration](docs/setup/03-network-configuration.md)** (45-60 min)
-   - Access point setup and NAT routing configuration
-   - Wi-Fi management and connectivity scripts
-
-4. **[Phase 4: Service Installation](docs/setup/04-service-installation.md)** (Coming Soon)
-   - Pi-hole, VPN, and additional services
-
-#### Option 2: Quick Reference
-
-For experienced users who prefer concise instructions:
-
-📖 **[Configuration Quick Reference](docs/configuration/)** - All config files and settings in one place
-
-### ⏱️ Estimated Time Requirements
-
-| Experience Level | Setup Time | Notes |
-|------------------|------------|---------|
-| **Beginner** | 4-6 hours | Follow step-by-step guides carefully |
-| **Intermediate** | 2-4 hours | Can skip some explanatory sections |
-| **Advanced** | 1-2 hours | Use quick reference + validation scripts |
-
-### 🔧 What You'll Build
-
-By the end of the installation:
-- **Secure Wi-Fi Access Point** providing internet to your devices
-- **Docker Environment** with Portainer web management 
-- **Network-Level Ad Blocking** with Pi-hole and custom blocklists
-- **VPN Integration** supporting both Tailscale and ProtonVPN
-- **Automated Management** with health monitoring and backups
-- **Web Interfaces** for easy administration
+**Estimated Time:** 2-6 hours depending on experience level
 
 ## Documentation
 
-### 📚 Main Guides
-
 The Pi4-TravelRouter documentation is organized into focused, modular guides:
 
-- **[Hardware Guide](docs/hardware/requirements.md)** - Complete hardware requirements and compatibility
-- **[Setup Guides](docs/setup/)** - Phase-based setup instructions
-- **[Configuration Reference](docs/configuration/)** - Templates and settings
-- **[Troubleshooting](docs/troubleshooting/)** - Solutions for common issues
+### 📚 Setup & Installation
+- **[Hardware Guide](docs/hardware/requirements.md)** - Hardware requirements and compatibility
+- **[Setup Guides](docs/setup/)** - Step-by-step installation instructions
+- **[Configuration Reference](docs/configuration/)** - Config files and templates
+
+### 🔧 Management & Maintenance
+- **[Troubleshooting Guide](docs/troubleshooting/)** - Common issues and solutions
 - **[Security Guide](docs/security/)** - Best practices and hardening
-- **[Maintenance](docs/maintenance/)** - Backup, updates, and monitoring
+- **[Maintenance Guide](docs/maintenance/)** - Backup, updates, and monitoring
 
-### 📓 Feature Documentation
+### 📋 Service-Specific Guides
+- **[Pi-hole DNS](docs/configuration/pihole.md)** - DNS filtering and ad blocking
+- **[Docker Compose](docs/configuration/docker-compose.md)** - Container orchestration
+- **[Network Config](docs/configuration/networking.md)** - Network setup and routing
+- **[ProtonVPN](docs/configuration/protonvpn.md)** - VPN client configuration
+- **Tailscale & WG-Easy guides** - Coming soon
 
-| Feature | Documentation | Status |
-|---------|---------------|--------|
-| **Pi-hole Ad Blocking** | [Pi-hole Guide](docs/configuration/pihole.md) | Ready |
-| **Tailscale VPN** | [Tailscale Guide](docs/configuration/tailscale.md) | Coming Soon |
-| **ProtonVPN Integration** | [ProtonVPN Guide](docs/configuration/protonvpn.md) | Coming Soon |
-| **WireGuard Management** | [WG-Easy Guide](docs/configuration/wg-easy.md) | Coming Soon |
-| **Monitoring & Stats** | [Monitoring Guide](docs/maintenance/monitoring.md) | Coming Soon |
+## Quick Usage Guide
 
-### 📁 Directory Structure
+### Web Interface Access
+Once connected to the router's Wi-Fi network (`RaspberryPi-Travel`):
 
-The repository is organized as follows:
+| Service | URL | Purpose |
+|---------|-----|----------|
+| **Pi-hole** | `http://192.168.4.1/admin` | DNS filtering management |
+| **Portainer** | `http://192.168.4.1:9000` | Docker container management |
+| **WG-Easy** | `http://192.168.4.1:51821` | WireGuard VPN management |
+| **SSH Access** | `ssh pi@192.168.4.1` | Command line access |
 
-```
-Pi4-TravelRouter/
-├── docs/                       # Documentation files
-│   ├── hardware/               # Hardware guides and compatibility
-│   ├── setup/                  # Step-by-step setup guides
-│   ├── configuration/          # Config file reference
-│   ├── troubleshooting/        # Issue resolution guides
-│   ├── security/               # Security hardening docs
-│   └── maintenance/            # Maintenance procedures
-├── src/                        # Source files
-│   ├── Lists/                  # DNS blocklists
-│   ├── scripts/                # Utility scripts
-│   ├── vpn_config/             # VPN configuration files
-│   ├── wg-easy/                # WireGuard web UI
-│   └── docker-compose-pihole.yml # Pi-hole configuration
-└── README.md                   # This file
-```
-      - "51821:51821/tcp"
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-```
-
-### VPN Configuration Files
-
-**🇨🇭 Swiss ProtonVPN WireGuard** (`src/vpn_config/pi-router-swiss-CH-US-3.conf`)
-```ini
-[Interface]
-# NetShield = 2 (blocks ads and malware)
-PrivateKey = [REDACTED_PRIVATE_KEY]
-Address = 10.2.0.2/32
-DNS = 10.2.0.1
-
-[Peer]
-# CH-US#3 Server
-PublicKey = [REDACTED_PUBLIC_KEY]
-AllowedIPs = 0.0.0.0/0, ::/0
-Endpoint = [REDACTED_ENDPOINT]:51820
-```
-
-**🇸🇪 Swedish ProtonVPN WireGuard** (`src/vpn_config/pi-router-SE-US-1.conf`)
-```ini
-[Interface]
-# NetShield = 2 (blocks ads and malware)
-PrivateKey = [REDACTED_PRIVATE_KEY]
-Address = 10.2.0.2/32
-DNS = 10.2.0.1
-
-[Peer]
-# SE-US#1 Server
-PublicKey = [REDACTED_PUBLIC_KEY]
-AllowedIPs = 0.0.0.0/0, ::/0
-Endpoint = [REDACTED_ENDPOINT]:51820
-```
-
-### DNS Blocklist Files
-
-**📁 `src/Lists/` Directory** - Contains comprehensive blocklists from [BlockListProject](https://github.com/blocklistproject/Lists):
-
-| File | Domains | Description |
-|------|---------|-------------|
-| `everything.txt` | ~3M+ domains | Combined list of all categories |
-| `ads.txt` | ~500K+ domains | Advertisement servers |
-| `malware.txt` | ~100K+ domains | Malware and phishing sites |
-| `tracking.txt` | ~200K+ domains | Analytics and tracking |
-| `facebook.txt` | ~1K+ domains | Facebook/Meta services |
-| `tiktok.txt` | ~500+ domains | TikTok/ByteDance services |
-| `gambling.txt` | ~10K+ domains | Gambling and betting sites |
-| `piracy.txt` | ~50K+ domains | Torrent and piracy sites |
-
-### System Optimization Settings
-
-**⚡ Performance Optimizations Applied:**
-- **8GB SSD Swap**: `/mnt/storage/swapfile` (replaces 512MB SD card swap)
-- **Memory Tuning**: `vm.swappiness=1`, `vm.min_free_kbytes=8192`
-- **Docker Log Rotation**: 10MB max file size, 3 file retention
-- **Automated Backups**: Daily at 3:00 AM with 7-day retention
-
-## Usage Instructions
-
-### Connecting to Public Wi-Fi
-
-Use the included script to connect the Pi to public Wi-Fi networks:
-
+### Common Commands
 ```bash
-# Connect to an open network
-sudo /usr/local/bin/connect-wifi.sh "Hotel-WiFi"
+# Connect to public Wi-Fi
+sudo connect-wifi.sh "Network-Name" "password"
 
-# Connect to a password-protected network  
-sudo /usr/local/bin/connect-wifi.sh "Cafe-WiFi" "password123"
-```
+# Check system status
+sudo systemctl status hostapd
+sudo docker ps
 
-The script will:
-1. Temporarily stop AP services
-2. Configure wpa_supplicant with network credentials
-3. Restart networking services
-4. Test internet connectivity
-5. Restart AP services if successful
-
-### Managing VPN Connections
-
-#### Tailscale VPN
-
-```bash
-# Start Tailscale (personal network access)
-sudo tailscale up --advertise-routes=192.168.4.0/24
-
-# Check Tailscale status
+# VPN management
 sudo tailscale status
-
-# Stop Tailscale
-sudo tailscale down
-```
-
-#### ProtonVPN WireGuard
-
-```bash
-# Start ProtonVPN (Swiss server)
-sudo /usr/local/bin/toggle-vpn.sh up
-
-# Stop ProtonVPN
-sudo /usr/local/bin/toggle-vpn.sh down
-
-# Check WireGuard status
 sudo wg show
 ```
 
-### Web Interface Access
+📊 **[Complete Usage Guide](docs/setup/04-service-installation.md)**
 
-Once connected to the travel router's Wi-Fi (`RaspberryPi-Travel`):
+## Additional Information
 
-| Service | URL | Purpose | Default Credentials |
-|---------|-----|---------|---------------------|
-| **Pi-hole** | `http://192.168.4.1/admin` | DNS filtering management | Password: `CHANGE_THIS_PASSWORD` |
-| **Portainer** | `http://192.168.4.1:9000` | Docker container management | Set during first login |
-| **WG-Easy** | `http://192.168.4.1:51821` | WireGuard client management | Password: Set in compose file |
-| **Router SSH** | `ssh pi@192.168.4.1` | Command line access | SSH key or password |
+🌐 **[Network Details](docs/configuration/networking.md)** - Complete network configuration reference
 
-### Common Management Tasks
-
-**📊 Monitor System Status:**
-```bash
-# Check all services
-sudo systemctl status travel-router
-sudo systemctl status hostapd
-sudo systemctl status dnsmasq
-
-# Check Docker containers
-sudo docker ps
-
-# View Pi-hole logs
-sudo docker logs pihole
-```
-
-**🔄 Restart Services:**
-```bash
-# Restart access point
-sudo systemctl restart hostapd dnsmasq
-
-# Restart Pi-hole
-sudo docker restart pihole
-
-# Apply iptables rules
-sudo /etc/iptables-rules.sh
-```
-
-**📱 Connected Devices:**
-```bash
-# View connected devices
-arp -a | grep 192.168.4
-
-# Check DHCP leases
-sudo cat /var/lib/dhcp/dhcpd.leases
-```
-
-## Network Details
-
-### Interface Configuration
-
-| Interface | Type | IP Address | Purpose | Status |
-|-----------|------|------------|---------|--------|
-| **eth0** | Ethernet | DHCP | Initial setup, backup connection | Optional |
-| **wlan0** | Built-in Wi-Fi | DHCP from public network | Internet gateway (STA mode) | Active |
-| **wlan1** | USB Wi-Fi Adapter | `192.168.4.1/24` | Access Point for client devices | Active |
-| **tailscale0** | VPN Interface | Tailscale-assigned | Personal network tunnel | Optional |
-| **protonvpn** | WireGuard VPN | `10.2.0.2/32` | ProtonVPN tunnel | Optional |
-
-### IP Address Ranges
-
-**🏠 Access Point Subnet: `192.168.4.0/24`**
-- **Gateway**: `192.168.4.1` (Raspberry Pi)
-- **DHCP Range**: `192.168.4.2` - `192.168.4.20` (19 addresses)
-- **Reserved**: `192.168.4.21` - `192.168.4.254` (static assignments)
-- **Broadcast**: `192.168.4.255`
-
-**🌐 VPN Networks:**
-- **ProtonVPN**: `10.2.0.2/32` (point-to-point)
-- **Tailscale**: `100.x.x.x/32` (assigned by Tailscale)
-- **WG-Easy**: `10.42.42.0/24` (WireGuard clients)
-
-### NAT and Routing Rules
-
-The system uses iptables for NAT and routing between interfaces:
-
-```bash
-# Main NAT rule (routes wlan1 traffic to wlan0)
-iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
-
-# Forward traffic between interfaces
-iptables -A FORWARD -i wlan0 -o wlan1 -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
-
-# Allow local traffic to Pi services
-iptables -A INPUT -i wlan1 -j ACCEPT
-iptables -A INPUT -i lo -j ACCEPT
-```
-
-**VPN Routing (when ProtonVPN is active):**
-```bash
-# Replace default NAT with ProtonVPN tunnel
-iptables -t nat -D POSTROUTING -o wlan0 -j MASQUERADE
-iptables -t nat -A POSTROUTING -o protonvpn -j MASQUERADE
-```
-
-### DNS Configuration
-
-**📡 DNS Resolution Flow:**
-1. **Client devices** → `192.168.4.1:53` (Pi-hole)
-2. **Pi-hole filtering** → Blocked domains return NXDOMAIN
-3. **Allowed domains** → Forwarded to upstream DNS
-4. **Upstream DNS**: `1.1.1.1`, `8.8.8.8` (or VPN DNS when active)
-
-**DNS Servers by Connection Mode:**
-- **Direct**: Cloudflare (`1.1.1.1`) + Google (`8.8.8.8`)
-- **ProtonVPN**: ProtonVPN DNS (`10.2.0.1`)
-- **Tailscale**: Split DNS (local domains to Tailscale)
-
-### Port Configuration
-
-| Port | Protocol | Service | Access |
-|------|----------|---------|--------|
-| `22` | TCP | SSH | Local network only |
-| `53` | TCP/UDP | Pi-hole DNS | Internal clients only |
-| `80` | TCP | Pi-hole Web UI | Local network only |
-| `9000` | TCP | Portainer | Local network only |
-| `51820` | UDP | WireGuard | Internet (for remote clients) |
-| `51821` | TCP | WG-Easy Web UI | Local network only |
-
-## Backup & Maintenance
-
-### Automated Backup System
-
-**💾 Daily Backups** configured via `/usr/local/bin/backup-router.sh`:
-
-```bash
-# Backup script runs daily at 3:00 AM
-0 3 * * * /usr/local/bin/backup-router.sh >> /var/log/backup.log 2>&1
-```
-
-**What's Backed Up:**
-- System configuration files (`/etc/hostapd/`, `/etc/dnsmasq.conf`, etc.)
-- Docker compose files and container volumes
-- Pi-hole configuration and blocklists
-- VPN configuration files
-- Network configuration (`/etc/dhcpcd.conf`, iptables rules)
-- Custom scripts and services
-
-**Backup Location:** `/mnt/storage/backups/`
-**Retention:** 7 days (older backups automatically deleted)
-**Log File:** `/var/log/backup.log`
-
-### Manual Backup Commands
-
-```bash
-# Run backup immediately
-sudo /usr/local/bin/backup-router.sh
-
-# View backup log
-sudo tail -f /var/log/backup.log
-
-# List available backups
-ls -la /mnt/storage/backups/
-```
-
-### System Updates
-
-**🔄 Monthly Maintenance Routine:**
-
-```bash
-# 1. Update system packages
-sudo apt update && sudo apt upgrade -y
-
-# 2. Update Docker containers
-sudo docker-compose pull
-sudo docker-compose up -d
-
-# 3. Clean up old images
-sudo docker system prune -f
-
-# 4. Update Tailscale
-sudo tailscale update
-
-# 5. Restart services
-sudo systemctl restart travel-router
-```
-
-**⚙️ System Health Checks:**
-
-```bash
-# Check disk usage
-df -h /mnt/storage
-
-# Check memory usage
-free -h
-
-# Check swap usage
-swapon -s
-
-# Check system temperature
-vcgencmd measure_temp
-```
-
-### Disaster Recovery
-
-**🆘 Complete System Restore:**
-
-1. **Fresh Pi Installation**: Install Raspberry Pi OS on new SD card
-2. **Restore from Backup**: 
-   ```bash
-   # Mount USB drive
-   sudo mount /dev/sda1 /mnt/storage
-   
-   # Extract latest backup
-   cd /
-   sudo tar -xzf /mnt/storage/backups/backup-YYYYMMDD.tar.gz
-   
-   # Restart services
-   sudo systemctl restart hostapd dnsmasq docker
-   ```
-3. **Verify Services**: Check all containers and services are running
-4. **Update Network Config**: Ensure interfaces are correctly configured
+💾 **[Backup & Maintenance](docs/maintenance/)** - Automated backups and system updates
 
 ## Troubleshooting
 
-### Common Issues & Solutions
+For comprehensive troubleshooting guides and solutions:
 
-#### ⚠️ **Access Point Not Broadcasting**
+🔍 **[Troubleshooting Guide](docs/troubleshooting/)** - Complete issue resolution guide
 
-**Symptoms**: Clients can't see `RaspberryPi-Travel` network
-
-**Diagnosis:**
+### Quick Diagnostics
 ```bash
-# Check hostapd status
+# Check service status
 sudo systemctl status hostapd
+sudo docker ps
 
-# Check USB adapter recognition
-lsusb | grep -i wireless
-iwconfig
+# Check network connectivity
+ping 8.8.8.8
+sudo iptables -t nat -L
 
-# View hostapd logs
+# View logs
 sudo journalctl -u hostapd -f
-```
-
-**Solutions:**
-```bash
-# Restart hostapd service
-sudo systemctl restart hostapd
-
-# Check hostapd configuration
-sudo hostapd -d /etc/hostapd/hostapd.conf
-
-# Ensure USB adapter is in AP mode
-sudo iw dev wlan1 info
-```
-
-#### 🌐 **No Internet Access for Clients**
-
-**Symptoms**: Clients connect to AP but can't reach internet
-
-**Diagnosis:**
-```bash
-# Check internet connectivity on Pi
-ping -c 3 8.8.8.8
-
-# Check NAT rules
-sudo iptables -t nat -L -v
-
-# Check IP forwarding
-cat /proc/sys/net/ipv4/ip_forward
-
-# Check wlan0 connection
-iwconfig wlan0
-```
-
-**Solutions:**
-```bash
-# Restart networking
-sudo systemctl restart dhcpcd
-
-# Reapply iptables rules
-sudo /etc/iptables-rules.sh
-
-# Enable IP forwarding
-echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-```
-
-#### 📋 **DNS Resolution Errors**
-
-**Symptoms**: Websites won't load, DNS timeouts
-
-**Diagnosis:**
-```bash
-# Check Pi-hole status
 sudo docker logs pihole
-sudo docker exec pihole pihole status
-
-# Test DNS resolution
-nslookup google.com 192.168.4.1
-dig @192.168.4.1 google.com
-
-# Check dnsmasq
-sudo systemctl status dnsmasq
 ```
 
-**Solutions:**
-```bash
-# Restart Pi-hole
-sudo docker restart pihole
+## Security
 
-# Restart dnsmasq
-sudo systemctl restart dnsmasq
+### Essential Security Steps
 
-# Flush Pi-hole cache
-sudo docker exec pihole pihole flush
-```
+⚠️ **Before First Use:**
 
-#### 🔒 **VPN Connection Failures**
+1. Change all default passwords (system, Wi-Fi, Pi-hole)
+2. Configure SSH key authentication
+3. Update all software packages
+4. Enable firewall with appropriate rules
 
-**ProtonVPN WireGuard Issues:**
-```bash
-# Check WireGuard status
-sudo wg show
-
-# Test VPN connection
-sudo wg-quick up protonvpn
-ping -c 3 1.1.1.1
-
-# Check routing
-sudo ip route show
-```
-
-**Tailscale Issues:**
-```bash
-# Check Tailscale status
-sudo tailscale status
-
-# Restart Tailscale
-sudo tailscale down && sudo tailscale up
-
-# Check logs
-sudo journalctl -u tailscaled -f
-```
-
-### Performance Issues
-
-#### 🐌 **Slow Performance**
-
-**Diagnosis:**
-```bash
-# Check system load
-htop
-
-# Check memory usage
-free -h
-
-# Check disk I/O
-iostat -x 1
-
-# Check temperature
-vcgencmd measure_temp
-```
-
-**Solutions:**
-- Ensure adequate cooling (add heatsink/fan)
-- Use faster USB 3.0 storage
-- Optimize Docker container resources
-- Check for runaway processes
-
-#### 📎 **High Memory Usage**
-
-```bash
-# Check swap usage
-swapon -s
-
-# Identify memory-hungry processes
-sudo ps aux --sort=-%mem | head -10
-
-# Restart high-usage containers
-sudo docker restart pihole
-```
-
-### Log Files
-
-**Important log locations:**
-- **System logs**: `/var/log/syslog`
-- **Backup logs**: `/var/log/backup.log`
-- **hostapd logs**: `sudo journalctl -u hostapd`
-- **dnsmasq logs**: `sudo journalctl -u dnsmasq`
-- **Pi-hole logs**: `sudo docker logs pihole`
-- **Docker logs**: `sudo journalctl -u docker`
-
-## Security Considerations
-
-### 🔒 Essential Security Steps
-
-**⚠️ Before First Use:**
-
-1. **Change Default Passwords**
-   ```bash
-   # Change Pi user password
-   passwd
-   
-   # Update Pi-hole web password
-   sudo docker exec pihole pihole -a -p NEW_PASSWORD
-   
-   # Update hostapd WiFi password in /etc/hostapd/hostapd.conf
-   sudo nano /etc/hostapd/hostapd.conf
-   # Change wpa_passphrase=ChangeThisPassword123
-   ```
-
-2. **Configure SSH Key Authentication**
-   ```bash
-   # Copy your public key to the Pi
-   ssh-copy-id pi@192.168.4.1
-   
-   # Disable password authentication (optional)
-   sudo nano /etc/ssh/sshd_config
-   # Set: PasswordAuthentication no
-   sudo systemctl restart ssh
-   ```
-
-3. **Update All Software**
-   ```bash
-   sudo apt update && sudo apt full-upgrade -y
-   sudo docker-compose pull
-   sudo tailscale update
-   ```
-
-### 🚪 Access Control
-
-**Firewall Configuration:**
-```bash
-# Allow only necessary ports
-sudo ufw enable
-sudo ufw allow ssh
-sudo ufw allow 53/udp comment 'DNS'
-sudo ufw allow 80/tcp comment 'Pi-hole Web'
-sudo ufw allow 51821/tcp comment 'WG-Easy'
-```
-
-**Pi-hole Security:**
-- Enable query logging for monitoring
-- Regularly update blocklists
-- Monitor for unusual DNS queries
-- Use strong admin password
-
-### 🔑 VPN Security
-
-**ProtonVPN:**
-- Keep WireGuard private keys secure
-- Rotate keys periodically
-- Use NetShield (included in configs)
-- Monitor for VPN disconnections
-
-**Tailscale:**
-- Enable MFA on Tailscale account
-- Use ACLs to restrict access
-- Regularly audit connected devices
-- Enable key expiry
-
-### 📶 Wi-Fi Security
-
-**Access Point Security:**
-- Use WPA2-PSK with strong passphrase (20+ characters)
-- Disable WPS
-- Hide SSID if desired (security through obscurity)
-- Regularly change Wi-Fi password
-- Monitor connected devices
-
-**Recommended AP Configuration:**
-```bash
-# In /etc/hostapd/hostapd.conf
-wpa=2
-wpa_key_mgmt=WPA-PSK
-wpa_pairwise=TKIP
-rsn_pairwise=CCMP
-wpa_passphrase=YourVeryStrongPasswordHere123!
-```
-
-### 📊 Monitoring & Alerting
-
-**Security Monitoring:**
-```bash
-# Monitor failed SSH attempts
-sudo grep "Failed password" /var/log/auth.log
-
-# Check for unusual network activity
-sudo netstat -tuln
-
-# Monitor Pi-hole query logs
-sudo docker exec pihole tail -f /var/log/pihole.log
-```
-
-**Recommended Regular Tasks:**
-- Weekly review of Pi-hole query logs
-- Monthly security updates
-- Quarterly password changes
-- Monitor system resource usage
-- Check backup integrity
-
-### 🚑 Incident Response
-
-**If Compromise is Suspected:**
-1. Immediately disconnect from internet
-2. Check system logs for suspicious activity
-3. Change all passwords
-4. Update all software
-5. Restore from clean backup if necessary
-6. Analyze logs to determine breach vector
+🔒 **[Complete Security Guide](docs/security/)** - Comprehensive security hardening and best practices
 
 ## Credits & License
 
-### 🚀 Open Source Components
+### Open Source Components
+Built with excellent open-source software:
+- [Pi-hole](https://pi-hole.net/) - Network-level ad blocking
+- [WG-Easy](https://github.com/wg-easy/wg-easy) - WireGuard management UI
+- [Docker](https://www.docker.com/) & [Portainer](https://portainer.io/) - Container management
+- [Tailscale](https://tailscale.com/) & [ProtonVPN](https://protonvpn.com/) - VPN services
+- [BlockListProject](https://github.com/blocklistproject/Lists) - DNS blocklists
 
-This project builds upon excellent open-source software:
+### License
+**MIT License** - See [LICENSE](LICENSE) file for details
 
-- **[Pi-hole](https://pi-hole.net/)** - Network-level advertisement and internet tracker blocking
-- **[WG-Easy](https://github.com/wg-easy/wg-easy)** - Simple WireGuard VPN management interface  
-- **[BlockListProject](https://github.com/blocklistproject/Lists)** - Comprehensive DNS blocklists
-- **[Tailscale](https://tailscale.com/)** - Zero-config mesh VPN networking
-- **[ProtonVPN](https://protonvpn.com/)** - Privacy-focused VPN service
-- **[Docker](https://www.docker.com/)** & **[Portainer](https://portainer.io/)** - Container management
-- **[Raspberry Pi Foundation](https://www.raspberrypi.org/)** - Amazing single-board computers
-
-### 🙏 Acknowledgments
-
-- **BlockListProject Team** - For maintaining comprehensive, categorized blocklists
-- **Pi-hole Developers** - For creating the best network-level ad blocker
-- **WG-Easy Contributors** - For simplifying WireGuard management
-- **Raspberry Pi Community** - For countless tutorials and troubleshooting guides
-- **r/raspberry_pi** & **r/pihole** - For community support and ideas
-
-### 📝 License
-
-**MIT License**
-
-```
-Copyright (c) 2025 CypherOxide
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
-### ❤️ Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-**Areas where contributions are especially welcome:**
-- Additional tested Wi-Fi adapter compatibility
-- Performance optimizations
-- Additional VPN provider configurations
-- Docker container updates
+### Contributing
+Contributions welcome! Please open an issue for major changes.
+- Hardware compatibility testing
 - Documentation improvements
-- Automated setup scripts
+- Performance optimizations
 
-### 💬 Support
-
+### Support
 - **Issues**: [GitHub Issues](https://github.com/cypheroxide/Pi4-TravelRouter/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/cypheroxide/Pi4-TravelRouter/discussions)
-- **Documentation**: Check `src/rpi4-travel-router-plan.md` for detailed setup
 
 ---
 
+🇨🇭 **Made with Swiss precision by [CypherOxide](https://github.com/cypheroxide)**
 **🇨🇭 Made with Swiss precision and ☕ caffeine by [CypherOxide](https://github.com/cypheroxide)**
