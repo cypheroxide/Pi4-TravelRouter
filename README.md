@@ -213,5 +213,4 @@ Contributions welcome! Please open an issue for major changes.
 
 ---
 
-🇨🇭 **Made with Swiss precision by [CypherOxide](https://github.com/cypheroxide)**
 **🇨🇭 Made with Swiss precision and ☕ caffeine by [CypherOxide](https://github.com/cypheroxide)**
